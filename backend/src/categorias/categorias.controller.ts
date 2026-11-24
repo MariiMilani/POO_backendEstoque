@@ -1,5 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from
- '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
  import { ApiTags } from '@nestjs/swagger';
  import { CategoriasService } from './categorias.service';
  import { CreateCategoriaDto } from './dto/create-categoria.dto';
