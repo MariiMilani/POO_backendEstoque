@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProdutoDto } from './dto/create-produto.dto';
 
@@ -25,13 +29,30 @@ export class ProdutosService {
   }
 
   async criar(dados: CreateProdutoDto) {
-    const categoria = await this.prisma.categoria.findUnique({ where: { id: dados.categoriaId } });
+    const categoria = await this.prisma.categoria.findUnique({
+      where: { id: dados.categoriaId },
+    });
     if (!categoria) {
-      throw new NotFoundException(`Categoria ${dados.categoriaId} não encontrada`);
+      throw new NotFoundException(
+        `Categoria ${dados.categoriaId} não encontrada`,
+      );
     }
     return this.prisma.produto.create({
       data: dados,
       include: { categoria: { select: { id: true, nome: true } } },
     });
+  }
+
+  async remover(id: number) {
+    await this.buscarUm(id);
+    const movimentacoes = await this.prisma.movimentacao.count({
+      where: { produtoId: id },
+    });
+    if (movimentacoes > 0) {
+      throw new ConflictException(
+        `O produto ${id} possui movimentações registradas`,
+      );
+    }
+    return this.prisma.produto.delete({ where: { id } });
   }
 }
